@@ -98,10 +98,39 @@ def main(args):
         if args.delete:
             sys.stdout.write('Deleting THREDDS stream: {:s}\n'.format(tds_path))
             # Remove all files first
-            d_contents = glob.glob(os.path.join(tds_path, '*'))
-            if not d_contents:
+            f_contents = glob.glob(os.path.join(tds_path, '*.*'))
+            if not f_contents:
                 sys.stderr.write('No files found: {:s}\n'.format(tds_path))
                 continue
+            
+            for f in f_contents:
+                if not os.path.isfile(f):
+                    sys.stderr.write('Entry is not a file: {:s}\n'.format(f))
+                    continue
+                try:
+                    os.remove(f)
+                except OSError as e:
+                    sys.stderr.write('{:s}: {:s}\n'.format(e.strerror, f))
+                    continue
+            # Recursively delete the directories from the bottom up provided they
+            # are empty
+            deleted_dirs = prune_empty_directories(TDS_NC_ROOT, rel_path)
+            #d_tokens = rel_path.split('/')
+            #while d_tokens:
+            #    target_dir = os.path.join(*[TDS_NC_ROOT, os.path.join(*d_tokens)])
+            #    f_contents = os.listdir(target_dir)
+            #    if f_contents:
+            #        sys.stdout.write('Parent directory is not empty: {:s}\n'.format(target_dir))
+            #        break
+            #        
+            #    # Remove the empty directory
+            #    sys.stderr.write('Removing empty directory: {:s}\n'.format(target_dir))
+            #    os.rmdir(target_dir)
+            #    
+            #    # Remove the last element from d_tokens to go up one directory
+            #    d_tokens.pop(-1)
+
+                       
         elif args.copy:
             sys.stdout.write('Copying THREDDS stream to {:s}\n'.format(args.location))
         elif args.move:
@@ -110,7 +139,34 @@ def main(args):
     status = 1
               
     return status
+
+def prune_empty_directories(root_dir, rel_path):
+    '''Recursively remove empty child directories, from the bottom up.  Removed
+    directories are relative (rel_path) to the root_dir'''
     
+    deleted_dirs = []
+    
+    d_tokens = rel_path.split('/')
+    while d_tokens:
+        target_dir = os.path.join(*[root_dir, os.path.join(*d_tokens)])
+        f_contents = os.listdir(target_dir)
+        if f_contents:
+            sys.stdout.write('Parent directory is not empty: {:s}\n'.format(target_dir))
+            break
+            
+        # Remove the empty directory
+        sys.stderr.write('Removing empty directory: {:s}\n'.format(target_dir))
+        try:
+            os.rmdir(target_dir)
+        except OSError as e:
+            sys.stderr.write('{:s}: {:s}\n'.format(e.strerror, target_dir))
+            break
+            
+        deleted_dirs.append(target_dir)
+        
+        # Remove the last element from d_tokens to go up one directory
+        d_tokens.pop(-1)
+        
 def csv2json(csv_filename):
     
     json_array = []
