@@ -65,15 +65,15 @@ def main(args):
         sys.stderr.flush()
         return 1
 
-    TDS_NCML_ROOT = os.getenv('ASYNC_TDS_NCML_ROOT')
-    if not TDS_NCML_ROOT:
-        sys.stderr.write('ASYNC_TDS_NCML_ROOT environment variable not set\n')
-        sys.stderr.flush()
-        return 1
-    elif not os.path.exists(TDS_NCML_ROOT):
-        sys.stderr.write('ASYNC_TDS_NCML_ROOT is invalid: {:s}\n'.format(TDS_NCML_ROOT))
-        sys.stderr.flush()
-        return 1
+    #TDS_NCML_ROOT = os.getenv('ASYNC_TDS_NCML_ROOT')
+    #if not TDS_NCML_ROOT:
+    #    sys.stderr.write('ASYNC_TDS_NCML_ROOT environment variable not set\n')
+    #    sys.stderr.flush()
+    #    return 1
+    #elif not os.path.exists(TDS_NCML_ROOT):
+    #    sys.stderr.write('ASYNC_TDS_NCML_ROOT is invalid: {:s}\n'.format(TDS_NCML_ROOT))
+    #    sys.stderr.flush()
+    #    return 1
 
     NCML_TEMPLATE = os.path.join(ASYNC_DATA_ROOT, 'catalogs', 'stream-agg-template.ncml')
     if not os.path.exists(NCML_TEMPLATE):
@@ -83,7 +83,7 @@ def main(args):
     sys.stdout.write('Async data home    : {:s}\n'.format(ASYNC_DATA_ROOT))
     sys.stdout.write('UFrame NetCDF Root : {:s}\n'.format(UFRAME_NC_ROOT))
     sys.stdout.write('THREDDS NetCDF Root: {:s}\n'.format(TDS_NC_ROOT))
-    sys.stdout.write('THREDDS NCML Root  : {:s}\n'.format(TDS_NCML_ROOT))
+    #sys.stdout.write('THREDDS NCML Root  : {:s}\n'.format(TDS_NCML_ROOT))
     sys.stdout.write('NCML Agg Template  : {:s}\n'.format(NCML_TEMPLATE))
    
     # Exit if we're just validating our environment setup (-v)
