@@ -50,15 +50,17 @@ def main(args):
             
     # Open args.csv_file for reading    
     csv_file = args.csv_file
-    fid = open(csv_file, 'r')
-    csv_reader = csv.reader(fid)
-    
-    # First row is the header
-    cols = csv_reader.next()
-    fid.close()
+    #fid = open(csv_file, 'r')
+    #csv_reader = csv.reader(fid)
+    ## First row is the header
+    #cols = csv_reader.next()
+    #fid.close()
     
     # convert the csv file rows to a dictionary
     streams = csv2json(csv_file)
+    if not streams:
+        sys.stderr.write('No streams parsed from csv file: {:s}\n'.format(csv_file))
+        return status
     
     # Make sure the csv_file contains the appropriate headers
     if len(set(required_cols).intersection(streams[0].keys())) != len(required_cols):
@@ -86,28 +88,36 @@ def main(args):
             
         tds_path = os.path.join(TDS_NC_ROOT, rel_path)
         
-        if not args.debug and not os.path.exists(tds_path):
+        if not os.path.exists(tds_path):
             sys.stderr.write('Invalid THREDDS stream location: {:s}\n'.format(tds_path))
             continue
         
         sys.stdout.write('Valid THREDDS stream location: {:s}\n'.format(tds_path))
+          
+        # Get the list of .ncml and .nc files in tds_path
+        f_contents = glob.glob(os.path.join(tds_path, '*.*'))
+        if not f_contents:
+            sys.stderr.write('No files found: {:s}\n'.format(tds_path))
+            continue
             
         if not args.delete and not args.copy and not args.move:
+            # Print the list of files found, then skip since we're not operating on
+            # these files
+            for f in f_contents:
+                sys.stdout.write('Found file: {:s}\n'.format(f))
+                
             continue
             
         if args.delete:
             sys.stdout.write('Deleting THREDDS stream: {:s}\n'.format(tds_path))
-            # Remove all files first
-            f_contents = glob.glob(os.path.join(tds_path, '*.*'))
-            if not f_contents:
-                sys.stderr.write('No files found: {:s}\n'.format(tds_path))
-                continue
             
+            # Remove all files first
             for f in f_contents:
                 if not os.path.isfile(f):
                     sys.stderr.write('Entry is not a file: {:s}\n'.format(f))
                     continue
                 try:
+                    sys.stdout.write('Deleting file: {:s}\n'.format(f))
                     os.remove(f)
                 except OSError as e:
                     sys.stderr.write('{:s}: {:s}\n'.format(e.strerror, f))
@@ -132,6 +142,11 @@ def main(args):
 
                        
         elif args.copy:
+            # Create the rel_path under args.location
+            new_location = os.path.join(args.location, rel_path)
+            try:
+                os.makedirs(new_location, mode=775)
+            except OS
             sys.stdout.write('Copying THREDDS stream to {:s}\n'.format(args.location))
         elif args.move:
             sys.stdout.write('Moving THREDDS stream to {:s}\n'.format(args.location))
