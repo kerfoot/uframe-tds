@@ -35,7 +35,7 @@ def main(args):
         # Make sure the ASYNC_TDS_NC_ROOT is set  in the user's environment if it
         # wasn't specified on the command line
         TDS_NC_ROOT = os.getenv('ASYNC_TDS_NC_ROOT')
-        if not args.debug and not TDS_NC_ROOT:
+        if not TDS_NC_ROOT:
             sys.stderr.write('ASYNC_TDS_NC_ROOT environment variable not set\n')
             sys.stderr.flush()
             return 1
